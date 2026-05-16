@@ -1,266 +1,203 @@
-# Peblo — AI Powered Notes Workspace
+# Peblo Notes
 
-Peblo is a modern AI-powered notes and productivity workspace built with Next.js, Prisma, and TypeScript.
-
-It provides a beautiful writing experience with AI-generated summaries, suggested titles, note sharing, tagging, dashboard analytics, dark mode support, and responsive multi-device layouts.
+A modern, AI-powered notes workspace built with Next.js, Prisma, and TypeScript. Write notes, get AI-generated summaries, share publicly, and track your productivity — all in one clean interface.
 
 ---
 
-# Features
+## Features
 
-## Authentication
+### Authentication
+- Signup and login with email and password
+- JWT-based session stored in a secure httpOnly cookie
+- Protected routes via Next.js middleware
+- Logout clears session instantly
 
-- User signup
-- User login
-- JWT session authentication
-- Protected routes
+### Notes
+- Create, edit, and delete notes
+- Auto-save while typing (debounced 800ms)
+- Archive and restore notes
+- Add and remove tags per note
+- Search by keyword across title and content
+- Filter by tag or archived status
 
----
+### AI
+- Generate a summary of any note
+- Extract action items automatically
+- Get a suggested title based on content
+- AI usage tracked per note and shown in dashboard
+- Powered by Groq (free, no credit card needed)
 
-## Notes System
+### Public Sharing
+- Generate a unique public link for any note
+- Shared notes are readable without login
+- Revoke the link anytime to make a note private
 
-- Create notes
-- Edit notes with autosave
-- Delete notes
-- Archive / restore notes
-- Tag support
-- Search notes
-- Filter archived notes
-
----
-
-## AI Features
-
-- AI-generated summaries
-- AI suggested titles
-- AI usage tracking
-
----
-
-## Public Sharing
-
-- Generate public share links
-- Read-only shared note pages
-
----
-
-## Dashboard
-
-- Total notes analytics
+### Dashboard
+- Total active notes count
+- Recently edited notes
+- Most-used tags
 - AI usage statistics
-- Weekly activity chart
-- Top tags
-- Recent notes
+- Weekly activity chart (last 7 days)
 
 ---
 
-## UI / UX
+## Tech Stack
 
-- Fully responsive layout
-- Dark mode support
-- Mobile sidebar
-- Clean modern SaaS design
-- Optimized editor experience
-
----
-
-# Tech Stack
-
-## Frontend
-
-- Next.js 16
-- React 19
-- TypeScript
-- Tailwind CSS
-- Lucide Icons
-- Recharts
-- next-themes
+| Layer | Choice |
+|---|---|
+| Framework | Next.js 14 (App Router) |
+| Language | TypeScript |
+| Styling | Tailwind CSS |
+| Database | SQLite via Prisma ORM |
+| Auth | Custom JWT with `jose` + `bcryptjs` |
+| AI | Groq API (`llama3-8b-8192`) |
+| Charts | Recharts |
+| Icons | Lucide React |
 
 ---
 
-## Backend
+## Getting Started
 
-- Next.js Route Handlers
-- Prisma ORM
-- SQLite
-- JWT Authentication
+### 1. Clone the repo
 
----
-
-## clone repo
 ```bash
-git clone https://github.com/your-username/peblo.git
+git clone https://github.com/your-username/peblo-notes.git
+cd peblo-notes
 ```
-cd peblo
+
+### 2. Install dependencies
+
+```bash
 npm install
+```
 
-## .env
+### 3. Set up environment variables
+
+Create a `.env` file in the root:
+
+```env
 DATABASE_URL="file:./dev.db"
-JWT_SECRET=
-NEXT_PUBLIC_APP_URL=
-GROQ_API_KEY=
+JWT_SECRET="your-long-random-secret-here"
+NEXT_PUBLIC_APP_URL="http://localhost:3000"
+GROQ_API_KEY="your-groq-api-key-here"
+```
 
-## prisma setup
-npx prisma generate
-npx prisma generate
+> Get a free Groq API key at [console.groq.com](https://console.groq.com) — no credit card required.
 
-## run dev server
+### 4. Set up the database
+
+```bash
+npx prisma migrate dev --name init
+npx prisma generate
+```
+
+### 5. Run the dev server
+
+```bash
 npm run dev
+```
 
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## api formats of signup signin logout
+---
 
-signup
-url : POST http://localhost:3000/api/auth/signup
- req  = {
-  "name":"ayansharma",
-  "email":"ayansharma2006@gmail.com",
-  "password":"ayan1234"
-  
+## Project Structure
+
+```
+src/
+├── app/
+│   ├── (auth)/             # Login and signup pages
+│   ├── (app)/              # Protected app pages
+│   │   ├── dashboard/      # Analytics and insights
+│   │   └── notes/          # Notes list and editor
+│   ├── shared/[slug]/      # Public shared note page
+│   └── api/                # All API route handlers
+├── components/
+│   ├── auth/               # LoginForm, SignupForm
+│   ├── notes/              # NotesList, NoteEditor, AiPanel, TagInput
+│   ├── dashboard/          # StatsCards, WeeklyChart, TopTags
+│   └── ui/                 # Button, Input, Sidebar, Topbar
+├── hooks/                  # useNotes, useNote, useDashboard, useUser
+├── lib/                    # prisma.ts, session.ts, api.ts
+└── types/                  # Shared TypeScript types
+```
+
+---
+
+## API Reference
+
+### Auth
+
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/api/auth/signup` | Create a new account |
+| POST | `/api/auth/login` | Login with email and password |
+| POST | `/api/auth/logout` | Clear session cookie |
+| GET | `/api/auth/me` | Get current logged-in user |
+
+**Signup request:**
+```json
+{
+  "name": "Ayan Sharma",
+  "email": "ayan@example.com",
+  "password": "ayan1234"
 }
-res = {
-  "success": true
+```
+
+**Login request:**
+```json
+{
+  "email": "ayan@example.com",
+  "password": "ayan1234"
 }
+```
 
-signin
+---
 
-url : POST http://localhost:3000/api/auth/login
- req  ={
-   "email":"ayansharma2006@gmail.com",
-  "password":"ayan1234"
+### Notes
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/notes` | Get all notes (supports search and filters) |
+| POST | `/api/notes` | Create a new note |
+| GET | `/api/notes/:id` | Get a single note |
+| PATCH | `/api/notes/:id` | Update title, content, tags, or archived |
+| DELETE | `/api/notes/:id` | Delete a note permanently |
+
+**Query params for GET /api/notes:**
+```
+?search=exam          search by keyword
+?tag=bca              filter by tag name
+?archived=true        show archived notes only
+```
+
+**Create note request:**
+```json
+{
+  "title": "BCA Exam Prep",
+  "content": "Need to revise networking topics for the exam.",
+  "tags": ["exam", "bca"]
 }
-res = {
-  "success": true
+```
+
+**Update note request (partial):**
+```json
+{
+  "title": "Updated Title"
 }
+```
 
-logout
-url : POST http://localhost:3000/api/auth/logout
+---
 
-res = {
-  "success": true
-}
+### AI
 
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/api/notes/:id/generate` | Generate summary, action items, and suggested title |
 
-## api structure of notes operations
-post a note
-url : POST http://localhost:3000/api/notes
- req  ={
-  "title":"there is a work of college exam",
-  "content":"work is giving the exam of networks in bca",
-  "tags":["exam", "bca"]
-}
-res ={
-  "title":"there is a work of college exam",
-  "content":"work is giving the exam of networks in bca",
-  "tags":["exam", "bca"]
-}
-
-
-filter a note'
-url : GET http://localhost:3000/api/notes?archived=true
-
-res ={
-  "notes": [
-    {
-      "id": "cmp77gq470001f8pf8b3bxodg",
-      "title": "there is a work of assignment ",
-      "content": "work is of making a software for the internshala company a full stack project it is ",
-      "archived": true,
-      "createdAt": "2026-05-15T17:42:49.400Z",
-      "updatedAt": "2026-05-15T17:42:49.400Z",
-      "userId": "cmp76ezy90000f8pfjlyi1gxw",
-      "aiSummary": null,
-      "aiActions": null,
-      "aiSuggestedTitle": null,
-      "aiUsageCount": 0,
-      "tags": [
-        {
-          "id": "cmp77gq4d0002f8pfcze2zypv",
-          "name": "full stack"
-        },
-        {
-          "id": "cmp77gq4h0003f8pfsraw0e6h",
-          "name": "project"
-        }
-      ],
-      "shareLink": null
-    }
-  ]
-}
-
-
-get a note
-url : GET http://localhost:3000/api/notes/cmp77gq470001f8pf8b3bxodg
-
-res ={
-  "id": "cmp77gq470001f8pf8b3bxodg",
-  "title": "there is a work of assignment ",
-  "content": "work is of making a software for the internshala company a full stack project it is ",
-  "archived": true,
-  "createdAt": "2026-05-15T17:42:49.400Z",
-  "updatedAt": "2026-05-15T17:42:49.400Z",
-  "userId": "cmp76ezy90000f8pfjlyi1gxw",
-  "aiSummary": null,
-  "aiActions": null,
-  "aiSuggestedTitle": null,
-  "aiUsageCount": 0,
-  "tags": [
-    {
-      "id": "cmp77gq4d0002f8pfcze2zypv",
-      "name": "full stack"
-    },
-    {
-      "id": "cmp77gq4h0003f8pfsraw0e6h",
-      "name": "project"
-    }
-  ],
-  "shareLink": null
-}
-
-
-update a note
-url : PATCH http://localhost:3000/api/notes/cmp77gq470001f8pf8b3bxodg
- req  ={
-  "title":"there is assignment work"
-}
-res ={
-  "id": "cmp77gq470001f8pf8b3bxodg",
-  "title": "there is assignment work",
-  "content": "work is of making a software for the internshala company a full stack project it is ",
-  "archived": true,
-  "createdAt": "2026-05-15T17:42:49.400Z",
-  "updatedAt": "2026-05-15T18:00:35.807Z",
-  "userId": "cmp76ezy90000f8pfjlyi1gxw",
-  "aiSummary": null,
-  "aiActions": null,
-  "aiSuggestedTitle": null,
-  "aiUsageCount": 0,
-  "tags": [
-    {
-      "id": "cmp77gq4d0002f8pfcze2zypv",
-      "name": "full stack"
-    },
-    {
-      "id": "cmp77gq4h0003f8pfsraw0e6h",
-      "name": "project"
-    }
-  ],
-  "shareLink": null
-}
-
-
-delete a note
-url : DELETE http://localhost:3000/api/notes/cmp77gq470001f8pf8b3bxodg
-
-res ={
-  "success": true
-}
-
-
-generate a summary of ai
-
-url : POST http://localhost:3000/api/notes/cmp77iqa80004f8pf3h2vdwfe/generate
-res ={
+**Response:**
+```json
+{
   "summary": "The upcoming college exam will cover Network topics from the BCA curriculum.",
   "action_items": [
     "Review Network fundamentals",
@@ -268,90 +205,134 @@ res ={
   ],
   "suggested_title": "BCA Network Exam Preparation"
 }
+```
 
+---
 
+### Sharing
 
-share a note or make a link
-url : POST http://localhost:3000/api/notes/cmp77iqa80004f8pf3h2vdwfe/share
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/api/notes/:id/share` | Generate a public share link |
+| DELETE | `/api/notes/:id/share` | Remove the share link |
+| GET | `/api/shared/:slug` | Get public note by slug (no auth) |
 
-res = {
+**Share response:**
+```json
+{
   "slug": "JvPvwNADZP",
   "url": "/shared/JvPvwNADZP"
 }
+```
 
+---
 
-shared a note
-url : GET http://localhost:3000/api/shared/JvPvwNADZP
+### Dashboard
 
-res = {
-  "title": "there is a work of college exam",
-  "content": "work is giving the exam of networks in bca",
-  "tags": [
-    {
-      "id": "cmp77iqaf0005f8pf8y1z5vat",
-      "name": "exam"
-    },
-    {
-      "id": "cmp77iqag0006f8pfvwcizwgx",
-      "name": "bca"
-    }
-  ],
-  "author": "ayansharma",
-  "updatedAt": "2026-05-15T18:25:59.559Z",
-  "aiSummary": "The upcoming college exam will cover Network topics from the BCA curriculum."
-}
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/dashboard` | Get all productivity insights |
 
-
-## GEt dashbaord info
-url : GET http://localhost:3000/api/dashboard
-res ={
+**Response:**
+```json
+{
   "totalNotes": 1,
   "recentNotes": [
-    {
-      "id": "cmp77iqa80004f8pf3h2vdwfe",
-      "title": "there is a work of college exam",
-      "updatedAt": "2026-05-15T18:25:59.559Z"
-    }
+    { "id": "...", "title": "BCA Exam Prep", "updatedAt": "2026-05-15T18:25:59.559Z" }
   ],
   "topTags": [
-    {
-      "name": "exam",
-      "count": 1
-    },
-    {
-      "name": "bca",
-      "count": 1
-    }
+    { "name": "exam", "count": 1 },
+    { "name": "bca", "count": 1 }
   ],
   "aiUsageCount": 2,
   "weeklyActivity": [
-    {
-      "day": "2026-05-09",
-      "count": 0
-    },
-    {
-      "day": "2026-05-10",
-      "count": 0
-    },
-    {
-      "day": "2026-05-11",
-      "count": 0
-    },
-    {
-      "day": "2026-05-12",
-      "count": 0
-    },
-    {
-      "day": "2026-05-13",
-      "count": 0
-    },
-    {
-      "day": "2026-05-14",
-      "count": 0
-    },
-    {
-      "day": "2026-05-15",
-      "count": 1
-    }
+    { "day": "2026-05-09", "count": 0 },
+    { "day": "2026-05-15", "count": 1 }
   ]
 }
+```
+
+---
+
+## Database Schema
+
+```prisma
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  notes     Note[]
+}
+
+model Note {
+  id          String   @id @default(cuid())
+  title       String
+  content     String   @default("")
+  archived    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  tags        Tag[]
+  shareLink   ShareLink?
+  aiSummary   String?
+  aiActions   String?
+  aiSuggestedTitle String?
+  aiUsageCount Int     @default(0)
+}
+
+model Tag {
+  id    String @id @default(cuid())
+  name  String  @unique
+  notes Note[]
+}
+
+model ShareLink {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  noteId    String   @unique
+  note      Note     @relation(fields: [noteId], references: [id],onDelete:Cascade)
+  createdAt DateTime @default(now())
+}
+```
+
+---
+
+## How Auth Works
+
+1. User signs up → password hashed with `bcryptjs`
+2. On login → password verified → JWT signed with `jose`
+3. JWT stored as an `httpOnly` cookie (JS cannot read it — XSS safe)
+4. Middleware verifies cookie on every protected route
+5. API routes call `getSession()` to get `userId` and query only that user's data
+6. Logout deletes the cookie
+
+---
+
+## Environment Variables
+
+| Variable | Description |
+|---|---|
+| `DATABASE_URL` | SQLite file path e.g. `file:./dev.db` |
+| `JWT_SECRET` | Long random string used to sign JWT tokens |
+| `NEXT_PUBLIC_APP_URL` | Base URL e.g. `http://localhost:3000` |
+| `GROQ_API_KEY` | Free API key from console.groq.com |
+
+---
+
+## .env.example
+
+```env
+DATABASE_URL="file:./dev.db"
+JWT_SECRET=
+NEXT_PUBLIC_APP_URL=
+GROQ_API_KEY=
+```
+
+---
+
+## License
+
+MIT
