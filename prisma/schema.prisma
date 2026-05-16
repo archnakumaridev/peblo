@@ -1,0 +1,53 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  notes     Note[]
+}
+
+model Note {
+  id          String   @id @default(cuid())
+  title       String
+  content     String   @default("")
+  archived    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  tags        Tag[]
+  shareLink   ShareLink?
+  aiSummary   String?
+  aiActions   String?
+  aiSuggestedTitle String?
+  aiUsageCount Int     @default(0)
+}
+
+model Tag {
+  id    String @id @default(cuid())
+  name  String  @unique
+  notes Note[]
+}
+
+model ShareLink {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  noteId    String   @unique
+  note      Note     @relation(fields: [noteId], references: [id],onDelete:Cascade)
+  createdAt DateTime @default(now())
+}

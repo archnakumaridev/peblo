@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-:root {
+/* :root {
   --background: #ffffff;
   --foreground: #171717;
 }
@@ -23,4 +23,47 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+} */
+
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+
+@layer base {
+  :root {
+    --background: 255 255 255;
+    --foreground: 10 10 10;
+
+    --card: 255 255 255;
+    --border: 230 230 230;
+
+    --muted: 245 245 245;
+
+    --primary: 24 24 27;
+  }
+
+  .dark {
+    --background: 10 10 10;
+    --foreground: 250 250 250;
+
+    --card: 18 18 18;
+    --border: 35 35 35;
+
+    --muted: 24 24 27;
+
+    --primary: 255 255 255;
+  }
+
+  * {
+    border-color: rgb(var(--border));
+  }
+
+  body {
+    background: rgb(var(--background));
+    color: rgb(var(--foreground));
+  }
+}
+
+html {
+  scroll-behavior: smooth;
 }
